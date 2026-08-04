@@ -64,6 +64,9 @@ A personal embedded/IoT project based on ESP32 + TFT display and a separate ESP8
 10. Upload firmware to ESP32.
 
 
+## Photo
+<img width="3024" height="4032" alt="IMG_0111" src="https://github.com/user-attachments/assets/0765bc91-d378-46d3-91a3-d5799544c3e3" />
+<img width="3024" height="4032" alt="IMG_0108" src="https://github.com/user-attachments/assets/26ae8d3f-2020-4683-aee0-2dcb07ba41da" />
 
 ## Release plan
 
