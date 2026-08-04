@@ -2,12 +2,19 @@
 
 A personal embedded/IoT project based on ESP32 + TFT display and a separate ESP8266/NodeMCU temperature node.
 
-## Project status
+## Features
 
-**v1.0.0-rc1 — Release Candidate**
-
-This repository is prepared for hardware validation. Library and board versions are intentionally marked as `TBD` until they are verified from the development environment.
-
+- Real-time clock using NTP
+- Weather data from external API
+- Temperature measurement using DS18B20
+- ESP32 ↔ ESP8266 communication
+- TFT graphical user interface
+- Wi-Fi connectivity
+- TCP communication
+- JSON data processing
+- Non-blocking network operations
+- Automatic display updates
+  
 ## Architecture
 
 ```text
@@ -26,54 +33,37 @@ This repository is prepared for hardware validation. Library and board versions 
                  TFT display
 ```
 
-## Features
-
-- ESP32-based TFT user interface
-- Weather data retrieval
-- NTP-based clock
-- Temperature data from a separate ESP8266/NodeMCU node
-- DS18B20 temperature sensor
-- Wi-Fi networking
-- TCP communication between ESP32 and ESP8266
-- JSON weather data processing
-- TFT_eSPI display support
-- Non-blocking/background network architecture in the original project
 
 ## Hardware
 
-- ESP32 development board
-- TFT display
+- ESP32 C3 ARD-ESP32-C3-TFT24
 - ESP8266 / NodeMCU
 - DS18B20 temperature sensor
 - Wi-Fi network
 
-## Software
+## Software Environment
 
-- Arduino Framework / Arduino IDE
-- C++
-- ESP32 Arduino Core
-- ESP8266 Arduino Core
-- TFT_eSPI
-- ArduinoJson
-- OneWire
-- DallasTemperature
+- Arduino IDE 2.3.10
+- ESP32 Arduino Core 2.0.14
+- TFT_eSPI 2.5.43
+- ArduinoJson 7.4.3
+- OneWire 2.3.8
+- DallasTemperature 4.0.6
 
-## Configuration
+## Installation
 
-1. Copy `config.example.h` to `config.h` when the project is finalized.
-2. Add your local Wi-Fi credentials and API key.
-3. Configure the ESP8266/NodeMCU IP address for your local network.
-4. Configure TFT_eSPI according to your display controller and wiring.
+1. Install Arduino IDE 2.3.10.
+2. Install ESP32 Arduino Core 2.0.14.
+3. Install required libraries.
+4. Configure TFT_eSPI.
+5. Create `config.h`.
+6. Configure Wi-Fi.
+7. Configure weather API.
+8. Configure ESP8266 IP address.
+9. Upload firmware to ESP8266.
+10. Upload firmware to ESP32.
 
-**Do not commit `config.h` or real credentials to a public repository.**
 
-## Important
-
-The exact library and board versions must be verified before tagging a stable release. See:
-
-- `docs/software-versions.md`
-- `docs/architecture.md`
-- `docs/wiring.md`
 
 ## Release plan
 
