@@ -3,6 +3,7 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include <TFT_eSPI.h>
+#include <ArduinoOTA.h>
 #include "time.h"
 
 // =====================================================
@@ -14,10 +15,12 @@ const char* apiKey = "";
 const char* city = "";
 const char* ntpServerName = "pool.ntp.org";
 
+
+
 // =====================================================
 // NodeMCU temperature server
 // =====================================================
-const char* server_ip = "192.168.0.105";
+const char* server_ip = "";
 const uint16_t server_port = 12345;
 
 // =====================================================
@@ -139,8 +142,6 @@ void copyWeatherData(float &temp, int &humidity, float &windSpeed, String &descr
 void fetchTemperatureFromServer() {
   WiFiClient client;
 
-  // Krótki timeout połączenia.
-  // Nawet gdy serwer nie odpowiada, główny ekran działa płynnie.
   client.setTimeout(1000);
 
   if (!client.connect(server_ip, server_port)) {
@@ -149,51 +150,52 @@ void fetchTemperatureFromServer() {
     return;
   }
 
-  client.println("GET / HTTP/1.1");
-  client.println("Host: 192.168.50.105");
-  client.println("Connection: close");
-  client.println();
+  Serial.println("[TEMP] Wysylam: TEMP");
+
+  // NodeMCU oczekuje dokładnie komendy TEMP
+  client.println("TEMP");
 
   String response;
-  response.reserve(512);
+  response.reserve(32);
 
   unsigned long startTime = millis();
 
-  while (millis() - startTime < 800) {
+  while (millis() - startTime < 1500) {
     while (client.available()) {
       char c = client.read();
       response += c;
-
-      // Nie potrzebujemy całej strony.
-      // Jeżeli znaleźliśmy temperaturę, możemy zakończyć.
-      if (response.indexOf("Aktualna temperatura: ") >= 0) {
-        int startIdx = response.indexOf("Aktualna temperatura: ");
-        startIdx += strlen("Aktualna temperatura: ");
-
-        int endIdx = response.indexOf(" &deg;C", startIdx);
-
-        if (endIdx > startIdx) {
-          String value = response.substring(startIdx, endIdx);
-          float temp = value.toFloat();
-
-          if (!isnan(temp)) {
-            setNodeTemperature(temp);
-            Serial.printf("[TEMP] %.1f C\n", temp);
-          }
-
-          client.stop();
-          return;
-        }
-      }
     }
 
-    // Nie używamy delay().
-    // Krótkie ustąpienie czasu innym zadaniom FreeRTOS.
-    vTaskDelay(pdMS_TO_TICKS(1));
+    if (response.length() > 0) {
+      break;
+    }
+
+    delay(1);
   }
 
   client.stop();
-  Serial.println("[TEMP] Timeout odczytu");
+
+  response.trim();
+
+  Serial.print("[TEMP] Odpowiedz NodeMCU: ");
+  Serial.println(response);
+
+  if (response.length() == 0) {
+    Serial.println("[TEMP] Brak odpowiedzi");
+    return;
+  }
+
+  float temperature = response.toFloat();
+
+  if (temperature > -100.0 && temperature < 125.0) {
+    Serial.print("[TEMP] Temperatura: ");
+    Serial.print(temperature, 2);
+    Serial.println(" C");
+
+    setNodeTemperature(temperature);
+  } else {
+    Serial.println("[TEMP] Nieprawidlowa temperatura");
+  }
 }
 
 // =====================================================
@@ -384,6 +386,7 @@ void setup() {
 
   // NTP
   configTime(7200, 0, ntpServerName);
+  setupOTA();
 
   // Mutex
   dataMutex = xSemaphoreCreateMutex();
@@ -410,10 +413,19 @@ void setup() {
   Serial.println("[SYSTEM] Start - UI nie jest blokowane przez siec");
 }
 
+
+void setupOTA() {
+  ArduinoOTA.setHostname("ESP32-WeatherStation");
+  ArduinoOTA.setPassword("");
+  ArduinoOTA.begin();
+  Serial.println("OTA Ready");
+}
+
 // =====================================================
 // LOOP
 // =====================================================
 void loop() {
+  ArduinoOTA.handle();
   unsigned long now = millis();
 
   // Pętla UI działa niezależnie od sieci.
